@@ -77,7 +77,7 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`}></span>
-        {health === 'no-data' ? 'no children' : health.replace('-', ' ')}
+        {health === 'no-data' ? 'no data' : health.replace('-', ' ')}
       </span>
     );
   };
@@ -296,7 +296,12 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                     </div>
                     {initiative.key !== '_unlinked' && (
                       <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                        <span>Status: {initiative.status}</span>
+                        <span className={`px-1.5 py-0.5 rounded ${
+                          initiative.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
+                          initiative.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>{initiative.status}</span>
+                        {initiative.health && initiative.health !== 'no-data' && healthBadge(initiative.health)}
                         <span>Assignee: {initiative.assignee}</span>
                         {initiative.dueDate && <span>Due: {new Date(initiative.dueDate).toLocaleDateString()}</span>}
                       </div>
@@ -327,6 +332,11 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                         <JiraLink issueKey={epic.key} jiraBaseUrl={jiraBaseUrl} className="text-xs font-medium text-purple-700" />
                       </span>
                       <span className="text-xs text-gray-700 flex-1">{epic.summary}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                        epic.status?.toLowerCase().includes('done') || epic.status?.toLowerCase().includes('closed') ? 'bg-green-100 text-green-700' :
+                        epic.status?.toLowerCase().includes('progress') ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-500'
+                      }`}>{epic.status}</span>
                       {healthBadge(epic.health)}
                       <div className="w-20">{progressBar(epic.progress)}</div>
                     </div>

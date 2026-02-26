@@ -193,11 +193,28 @@ class EpicMetricsService {
       initiative.completedStoryPoints += epic.children.completedPoints;
     }
 
-    // Calculate progress per initiative
+    // Calculate progress and health per initiative
     for (const init of initiativeMap.values()) {
       init.progress = init.totalEpics > 0
         ? Math.round((init.completedEpics / init.totalEpics) * 100)
         : 0;
+
+      // Derive health from epic statuses
+      if (init.totalEpics === 0) {
+        init.health = 'no-data';
+      } else if (init.statusCategory === 'done' || init.completedEpics === init.totalEpics) {
+        init.health = 'done';
+      } else {
+        const blockedEpics = init.epics.filter(e => e.health === 'blocked').length;
+        const atRiskEpics = init.epics.filter(e => e.health === 'at-risk').length;
+        if (blockedEpics > 0) {
+          init.health = 'blocked';
+        } else if (atRiskEpics > 0) {
+          init.health = 'at-risk';
+        } else {
+          init.health = 'on-track';
+        }
+      }
     }
 
     // Convert to array, filter out empty unlinked bucket

@@ -99,6 +99,7 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
         health: initiative.health || 'no-data',
         progress: initiative.progress || 0,
         status: initiative.status,
+        statusCategory: initiative.statusCategory,
         _start: initStart,
         _end: initEnd,
         _type: 'initiative',
@@ -429,7 +430,20 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                           {row.key !== '_unlinked' ? (
                             <JiraLink issueKey={row.key} jiraBaseUrl={jiraBaseUrl} className="text-purple-600 font-medium" />
                           ) : '—'}
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            row.health === 'done' ? 'bg-gray-400' :
+                            row.health === 'on-track' ? 'bg-green-500' :
+                            row.health === 'at-risk' ? 'bg-amber-500' :
+                            row.health === 'blocked' ? 'bg-red-500' : 'bg-gray-300'
+                          }`} title={row.health}></span>
                           <span className="truncate">{row.summary}</span>
+                          {row.status && row.key !== '_unlinked' && (
+                            <span className={`text-[9px] px-1 rounded shrink-0 ${
+                              row.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
+                              row.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-500'
+                            }`}>{row.status}</span>
+                          )}
                           <span className="text-gray-400 font-normal shrink-0">({row._children?.length || 0})</span>
                         </span>
                       ) : (
@@ -443,6 +457,11 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                             row.health === 'blocked' ? 'bg-red-500' : 'bg-gray-300'
                           }`} title={row.health}></span>
                           <span className="truncate">{row.summary}</span>
+                          <span className={`text-[9px] px-1 rounded shrink-0 ${
+                            row.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
+                            row.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>{row.status}</span>
                         </span>
                       )}
                     </div>
@@ -466,12 +485,12 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                           }}
                         >
                           {/* Progress fill inside bar */}
-                          {row.progress > 0 && row.progress < 100 && !isInit && (
+                          {row.progress > 0 && row.progress < 100 && (
                             <div className="absolute left-0 top-0 h-full rounded-l"
                               style={{
                                 width: `${row.progress}%`,
                                 backgroundColor: colors.bg,
-                                opacity: 0.4
+                                opacity: isInit ? 0.5 : 0.4
                               }} />
                           )}
                         </div>
@@ -491,7 +510,8 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                             <span className="font-medium text-gray-800">{row.key}</span>
                             {row.status && (
                               <span className={`text-[9px] px-1 rounded ${
-                                row.health === 'done' ? 'bg-green-100 text-green-700' :
+                                row.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
+                                row.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :
                                 row.health === 'blocked' ? 'bg-red-100 text-red-700' :
                                 'bg-gray-100 text-gray-600'
                               }`}>{row.status}</span>
@@ -502,9 +522,9 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                           {row.progress !== undefined && (
                             <div className="flex items-center gap-2 mt-1">
                               <span>Progress: {row.progress}%</span>
-                              {row.health && (
+                              {row.health && row.health !== 'no-data' && (
                                 <span className="px-1.5 py-0.5 rounded" style={{ backgroundColor: colors.bgLight, color: colors.text }}>
-                                  {row.health === 'no-data' ? 'no children' : row.health}
+                                  {row.health.replace('-', ' ')}
                                 </span>
                               )}
                             </div>

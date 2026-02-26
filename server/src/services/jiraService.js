@@ -887,7 +887,8 @@ class JiraService {
 
     const fields = [
       'summary', 'status', 'issuetype', 'assignee',
-      'resolutiondate', 'created', 'customfield_10061', 'parent'
+      'resolutiondate', 'created', 'customfield_10061', 'parent',
+      'customfield_10014' // Epic Link (classic Jira)
     ];
 
     // JQL has a practical limit on clause length, so batch epic keys in groups
@@ -895,8 +896,8 @@ class JiraService {
     for (let i = 0; i < epicKeys.length; i += jqlBatchSize) {
       const batch = epicKeys.slice(i, i + jqlBatchSize);
       const keysList = batch.map(k => `"${k}"`).join(',');
-      // Use parent IN (...) — covers both parent link and Epic Link
-      const jql = `parent in (${keysList}) ORDER BY status ASC`;
+      // Use parent IN (...) OR "Epic Link" IN (...) to cover both next-gen and classic projects
+      const jql = `(parent in (${keysList}) OR "Epic Link" in (${keysList})) ORDER BY status ASC`;
 
       let allIssues = [];
       let nextPageToken = null;
@@ -919,8 +920,9 @@ class JiraService {
       }
 
       // Map children back to their parent epic
+      // Check both next-gen "parent" field and classic "Epic Link" (customfield_10014)
       for (const issue of allIssues) {
-        const parentKey = issue.fields.parent?.key;
+        const parentKey = issue.fields.parent?.key || issue.fields.customfield_10014;
         if (parentKey && childrenMap.has(parentKey)) {
           childrenMap.get(parentKey).push(issue);
         }
