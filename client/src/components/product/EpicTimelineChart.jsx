@@ -479,18 +479,27 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                             width: `${barWidth}%`,
                             height: isInit ? ROW_HEIGHT - 10 : ROW_HEIGHT - 14,
                             top: isInit ? 5 : 7,
-                            backgroundColor: isInit ? colors.bgLight : colors.bg,
+                            backgroundColor: isInit ? '#f3f4f6' : colors.bg,
                             border: isInit ? `2px solid ${colors.bg}` : 'none',
                             opacity: isHovered ? 1 : 0.85
                           }}
                         >
-                          {/* Progress fill inside bar */}
+                          {/* Progress fill inside bar — green for all */}
                           {row.progress > 0 && row.progress < 100 && (
                             <div className="absolute left-0 top-0 h-full rounded-l"
                               style={{
                                 width: `${row.progress}%`,
-                                backgroundColor: colors.bg,
-                                opacity: isInit ? 0.5 : 0.4
+                                backgroundColor: '#22c55e',
+                                opacity: isInit ? 0.6 : 0.4
+                              }} />
+                          )}
+                          {/* Full green bar when 100% done */}
+                          {row.progress >= 100 && (
+                            <div className="absolute left-0 top-0 h-full rounded"
+                              style={{
+                                width: '100%',
+                                backgroundColor: '#22c55e',
+                                opacity: isInit ? 0.6 : 0.4
                               }} />
                           )}
                         </div>
