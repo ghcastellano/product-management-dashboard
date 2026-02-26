@@ -1,0 +1,235 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import productController from './controllers/productController.js';
+import database from './services/database.js';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '../public');
+  app.use(express.static(frontendPath));
+}
+
+// API Routes
+// Get default Jira credentials (for team-wide access)
+app.get('/api/credentials', (req, res) => {
+  const jiraUrl = process.env.JIRA_URL;
+  const jiraEmail = process.env.JIRA_EMAIL;
+  const jiraToken = process.env.JIRA_API_TOKEN;
+
+  // Only return credentials if all are configured
+  if (jiraUrl && jiraEmail && jiraToken) {
+    res.json({
+      success: true,
+      credentials: {
+        jiraUrl,
+        email: jiraEmail,
+        apiToken: jiraToken
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      message: 'No default credentials configured'
+    });
+  }
+});
+
+// Jira connection & boards
+app.post('/api/jira/test-connection', (req, res) =>
+  productController.testConnection(req, res)
+);
+
+app.post('/api/jira/boards', (req, res) =>
+  productController.getBoards(req, res)
+);
+
+// Cached boards endpoint (fast, no credentials needed)
+app.get('/api/jira/boards/cached', async (req, res) => {
+  try {
+    const cachedBoards = await database.getCachedBoards(24 * 3600 * 1000); // 24h TTL
+    if (cachedBoards && cachedBoards.length > 0) {
+      res.json({ success: true, boards: cachedBoards, source: 'cache' });
+    } else {
+      res.json({ success: false, boards: [], message: 'No cached boards available' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Board history
+app.get('/api/history/boards', async (req, res) => {
+  try {
+    const boards = await database.getAllBoardsWithMetrics();
+    res.json({ success: true, boards });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ==============================
+// TEAM METRICS endpoints
+// ==============================
+app.post('/api/jira/sprints', (req, res) =>
+  productController.getSprints(req, res)
+);
+
+app.post('/api/metrics/team', (req, res) =>
+  productController.getTeamMetrics(req, res)
+);
+
+app.post('/api/metrics/flow', (req, res) =>
+  productController.getFlowMetrics(req, res)
+);
+
+app.post('/api/metrics/capacity', (req, res) =>
+  productController.getCapacityMetrics(req, res)
+);
+
+app.post('/api/diagnostics', (req, res) =>
+  productController.diagnostics(req, res)
+);
+
+// Releases / Versions endpoints
+app.post('/api/releases', (req, res) =>
+  productController.getReleases(req, res)
+);
+
+app.post('/api/releases/details', (req, res) =>
+  productController.getReleaseDetails(req, res)
+);
+
+app.post('/api/releases/burndown', (req, res) =>
+  productController.getReleaseBurndown(req, res)
+);
+
+// Save releases cache (details + burndown) to DB
+app.post('/api/releases/save-cache', async (req, res) => {
+  try {
+    const { boardId, releasesData } = req.body;
+    const success = await database.updateLatestWithReleases(parseInt(boardId), releasesData);
+    res.json({ success });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// History endpoints
+app.get('/api/history/all-latest', async (req, res) => {
+  try {
+    const allMetrics = await database.getAllBoardsWithLatestMetrics();
+    res.json({ success: true, boards: allMetrics });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get('/api/history/board/:boardId', async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const history = await database.getMetricsHistory(parseInt(boardId), 30);
+    res.json({ success: true, history });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get('/api/history/metrics/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const metrics = await database.getMetricsById(parseInt(id));
+    if (metrics) {
+      res.json({ success: true, data: metrics });
+    } else {
+      res.status(404).json({ success: false, message: 'Metrics not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.delete('/api/history/board/:boardId', async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const removed = await database.deleteBoardMetrics(parseInt(boardId));
+    res.json({ success: true, removed });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ==============================
+// PRODUCT MANAGEMENT endpoints
+// ==============================
+app.post('/api/product/epics', (req, res) =>
+  productController.getEpics(req, res)
+);
+
+app.post('/api/product/dependencies', (req, res) =>
+  productController.getEpicDependencies(req, res)
+);
+
+app.post('/api/product/prioritization', (req, res) =>
+  productController.getEpicPrioritization(req, res)
+);
+
+app.post('/api/product/portfolio', (req, res) =>
+  productController.getPortfolioView(req, res)
+);
+
+app.post('/api/product/cached', (req, res) =>
+  productController.getCachedProductData(req, res)
+);
+
+app.post('/api/product/discover-fields', (req, res) =>
+  productController.discoverFields(req, res)
+);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+  });
+}
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on 0.0.0.0:${PORT}`);
+  console.log(`📦 Product Management Dashboard API ready`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Allow up to 2 minutes for heavy cross-board queries
+server.timeout = 120000;
+server.keepAliveTimeout = 120000;
+
+export default app;

@@ -1,0 +1,20 @@
+{
+  "name": "product-management-dashboard",
+  "version": "1.0.0",
+  "description": "Product Management Dashboard - Epic Intelligence, Prioritization & Portfolio",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build:all": "cd server && npm install && cd ../client && npm install && npm run build && cd .. && mkdir -p server/public && cp -r client/dist/* server/public/",
+    "start": "cd server && npm start"
+  },
+  "keywords": ["product-management", "jira", "epics", "portfolio", "agile"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
