@@ -195,9 +195,14 @@ class EpicMetricsService {
 
     // Calculate progress and health per initiative
     for (const init of initiativeMap.values()) {
-      init.progress = init.totalEpics > 0
-        ? Math.round((init.completedEpics / init.totalEpics) * 100)
-        : 0;
+      // Progress = average of each epic's child-issue progress (not just counting fully-done epics)
+      // This way an initiative with 5 epics at 20% each shows 20%, not 0%
+      if (init.totalEpics > 0) {
+        const sumProgress = init.epics.reduce((sum, e) => sum + (e.progress || 0), 0);
+        init.progress = Math.round(sumProgress / init.totalEpics);
+      } else {
+        init.progress = 0;
+      }
 
       // Derive health from epic statuses
       if (init.totalEpics === 0) {
