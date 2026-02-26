@@ -2,6 +2,7 @@
   "name": "product-management-dashboard",
   "version": "1.0.0",
   "description": "Product Management Dashboard - Epic Intelligence, Prioritization & Portfolio",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
