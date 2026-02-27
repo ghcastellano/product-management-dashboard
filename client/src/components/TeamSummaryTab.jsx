@@ -368,15 +368,15 @@ export default function TeamSummaryTab({ metrics, capacityData, flowMetrics, cre
         }
       });
       return Object.values(byAssignee)
-        .filter(d => d.completed > 0)
-        .sort((a, b) => b.completed - a.completed)
-        .slice(0, 5);
+        .filter(d => d.issuesAssigned > 0)
+        .sort((a, b) => b.completed - a.completed || b.committed - a.committed)
+        .slice(0, 8);
     }
     // Aggregated: from workDistribution
     return workDistribution
-      .filter(d => d.completed > 0)
-      .sort((a, b) => b.completed - a.completed)
-      .slice(0, 5);
+      .filter(d => d.issuesAssigned > 0)
+      .sort((a, b) => b.completed - a.completed || b.committed - a.committed)
+      .slice(0, 8);
   }, [workDistribution, sprintCapacity, selectedSprintIdx]);
 
   // Filtered sprint metrics for health indicators
@@ -649,8 +649,8 @@ export default function TeamSummaryTab({ metrics, capacityData, flowMetrics, cre
           {topContributors.length > 0 ? (
             <div className="space-y-3">
               {topContributors.map((dev, idx) => {
-                const maxCompleted = topContributors[0]?.completed || 1;
-                const pct = (dev.completed / maxCompleted) * 100;
+                const maxCommitted = Math.max(...topContributors.map(d => d.committed), 1);
+                const pct = (dev.committed / maxCommitted) * 100;
                 const medal = idx === 0 ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
                   : idx === 1 ? 'bg-gray-100 text-gray-700 border-gray-300'
                   : idx === 2 ? 'bg-orange-100 text-orange-800 border-orange-300'
@@ -665,14 +665,18 @@ export default function TeamSummaryTab({ metrics, capacityData, flowMetrics, cre
                         <span className="text-sm font-medium text-gray-800 truncate">{dev.name}</span>
                         <span className="text-sm font-bold text-blue-600 ml-2">{dev.completed} SP</span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div className="w-full bg-gray-100 rounded-full h-2 relative">
                         <div
-                          className="bg-blue-500 rounded-full h-2 transition-all"
+                          className="bg-blue-200 rounded-full h-2 absolute left-0 top-0 transition-all"
                           style={{ width: `${pct}%` }}
+                        />
+                        <div
+                          className="bg-blue-500 rounded-full h-2 absolute left-0 top-0 transition-all"
+                          style={{ width: `${dev.committed > 0 ? (dev.completed / maxCommitted) * 100 : 0}%` }}
                         />
                       </div>
                       <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
-                        <span>{dev.issuesCompleted} issues completed</span>
+                        <span>{dev.issuesAssigned} issues assigned</span>
                         <span>{dev.committed} SP committed</span>
                       </div>
                     </div>
