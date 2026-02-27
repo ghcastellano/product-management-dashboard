@@ -265,6 +265,7 @@ export default function Dashboard({ credentials: credentialsProp, selectedBoards
       loadBoardHistory(boardId);
     } else {
       // Board has no data - clear metrics so auto-refresh useEffect triggers
+      autoRefreshingRef.current = false; // Reset so auto-refresh can fire for the new board
       setMetrics(null);
       setFlowMetrics(null);
       setCapacityData(null);

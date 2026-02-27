@@ -333,6 +333,16 @@ export default function PortfolioTab({ credentials, selectedBoards, portfolioDat
                     <JiraLink issueKey={init.key} jiraBaseUrl={jiraBaseUrl} className="text-xs font-medium text-purple-700" />
                   </span>
                   <span className="text-xs text-gray-600 flex-1 truncate">{init.summary}</span>
+                  <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
+                    {init.targetStart ? new Date(init.targetStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                      : init.created ? new Date(init.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                      : '—'}
+                  </span>
+                  <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
+                    {init.targetEnd ? new Date(init.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                      : init.dueDate ? new Date(init.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                      : '—'}
+                  </span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
                     init.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
                     init.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :

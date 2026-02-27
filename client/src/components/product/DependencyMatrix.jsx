@@ -28,9 +28,10 @@ export default function DependencyMatrix({ epics, jiraBaseUrl = '' }) {
       'done': 'bg-gray-100 text-gray-500',
       'no-data': 'bg-gray-50 text-gray-400'
     };
+    const label = (health || 'no-data').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     return (
-      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${colors[health] || colors['no-data']}`}>
-        {health}
+      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${colors[health] || colors['no-data']}`}>
+        {label}
       </span>
     );
   };
@@ -80,10 +81,10 @@ export default function DependencyMatrix({ epics, jiraBaseUrl = '' }) {
           <thead className="sticky top-0 bg-white z-10">
             <tr className="border-b border-gray-200">
               <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Epic</th>
-              <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Health</th>
-              <th className="text-left py-2 px-3 text-xs font-medium text-amber-600 uppercase">Blocks</th>
-              <th className="text-left py-2 px-3 text-xs font-medium text-red-600 uppercase">Blocked By</th>
-              <th className="text-left py-2 px-3 text-xs font-medium text-blue-600 uppercase">Related</th>
+              <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Health</th>
+              <th className="text-left py-2 px-3 text-xs font-medium text-amber-600 uppercase whitespace-nowrap">Blocks</th>
+              <th className="text-left py-2 px-3 text-xs font-medium text-red-600 uppercase whitespace-nowrap">Blocked By</th>
+              <th className="text-left py-2 px-3 text-xs font-medium text-blue-600 uppercase whitespace-nowrap">Related</th>
             </tr>
           </thead>
           <tbody>

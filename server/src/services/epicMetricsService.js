@@ -146,7 +146,10 @@ class EpicMetricsService {
         status: init.fields?.status?.name || 'Unknown',
         statusCategory: init.fields?.status?.statusCategory?.key || 'new',
         assignee: init.fields?.assignee?.displayName || 'Unassigned',
+        created: init.fields?.created || null,
         dueDate: init.fields?.duedate || null,
+        targetStart: init.fields?.customfield_10015 || init.fields?.customfield_10011 || null,
+        targetEnd: init.fields?.customfield_10016 || null,
         epics: [],
         totalEpics: 0,
         completedEpics: 0,
@@ -181,10 +184,15 @@ class EpicMetricsService {
         key: epic.key,
         summary: epic.summary,
         status: epic.status,
+        statusCategory: epic.statusCategory,
         progress: epic.progress,
         health: epic.health,
         storyPoints: epic.children.totalPoints,
-        completedPoints: epic.children.completedPoints
+        completedPoints: epic.children.completedPoints,
+        created: epic.created,
+        dueDate: epic.dueDate,
+        targetStart: epic.targetStart,
+        targetEnd: epic.targetEnd
       });
 
       initiative.totalEpics++;
