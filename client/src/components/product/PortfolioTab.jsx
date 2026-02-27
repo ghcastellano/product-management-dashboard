@@ -318,11 +318,10 @@ export default function PortfolioTab({ credentials, selectedBoards, portfolioDat
               <p className="text-xs text-gray-500">Avg Initiative Progress</p>
             </div>
           </div>
-          {/* Top initiatives with progress */}
-          <div className="space-y-2">
+          {/* All initiatives with progress */}
+          <div className="space-y-2 max-h-[500px] overflow-y-auto">
             {initiativeSummary.initiatives
               .sort((a, b) => b.totalEpics - a.totalEpics)
-              .slice(0, 8)
               .map(init => (
                 <div key={init.key} className="flex items-center gap-3">
                   <span className="inline-flex items-center gap-1 w-24 shrink-0">
@@ -330,6 +329,11 @@ export default function PortfolioTab({ credentials, selectedBoards, portfolioDat
                     <JiraLink issueKey={init.key} jiraBaseUrl={jiraBaseUrl} className="text-xs font-medium text-purple-700" />
                   </span>
                   <span className="text-xs text-gray-600 flex-1 truncate">{init.summary}</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
+                    init.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
+                    init.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :
+                    'bg-gray-100 text-gray-500'
+                  }`}>{init.status}</span>
                   <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
                     <div className={`h-full rounded-full ${init.progress >= 80 ? 'bg-green-500' : init.progress >= 40 ? 'bg-amber-500' : 'bg-blue-500'}`}
                       style={{ width: `${init.progress}%` }} />
