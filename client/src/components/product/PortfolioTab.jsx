@@ -4,6 +4,13 @@ import { IssueTypeIcon, JiraLink } from './JiraIcons';
 
 const WIP_LIMIT_DEFAULT = 10;
 
+const formatSafeDate = (dateStr) => {
+  if (!dateStr || typeof dateStr === 'object') return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+};
+
 export default function PortfolioTab({ credentials, selectedBoards, portfolioData, epicData }) {
   const jiraBaseUrl = credentials?.jiraUrl?.replace(/\/$/, '') || '';
   const data = portfolioData || null;
@@ -334,14 +341,10 @@ export default function PortfolioTab({ credentials, selectedBoards, portfolioDat
                   </span>
                   <span className="text-xs text-gray-600 flex-1 truncate">{init.summary}</span>
                   <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
-                    {init.targetStart ? new Date(init.targetStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                      : init.created ? new Date(init.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                      : '—'}
+                    {formatSafeDate(init.targetStart) || formatSafeDate(init.created) || '—'}
                   </span>
                   <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
-                    {init.targetEnd ? new Date(init.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                      : init.dueDate ? new Date(init.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                      : '—'}
+                    {formatSafeDate(init.targetEnd) || formatSafeDate(init.dueDate) || '—'}
                   </span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
                     init.statusCategory === 'done' ? 'bg-green-100 text-green-700' :

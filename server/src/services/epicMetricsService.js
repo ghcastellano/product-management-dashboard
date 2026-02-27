@@ -1,5 +1,14 @@
 class EpicMetricsService {
 
+  // Validate and extract a date field (filter out objects like sprint arrays)
+  _extractDateField(value) {
+    if (!value) return null;
+    if (typeof value === 'object') return null; // Sprint objects, arrays, etc
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return null;
+    return value;
+  }
+
   // Calculate progress for an epic based on its children
   calculateEpicProgress(children) {
     if (!children || children.length === 0) {
@@ -110,9 +119,9 @@ class EpicMetricsService {
       updated: epic.fields?.updated,
       dueDate: epic.fields?.duedate || null,
       resolutionDate: epic.fields?.resolutiondate || null,
-      // Jira Plans / Advanced Roadmaps date fields
-      targetStart: epic.fields?.customfield_10015 || epic.fields?.customfield_10011 || null,
-      targetEnd: epic.fields?.customfield_10016 || null,
+      // Jira Plans / Advanced Roadmaps date fields (validate they are date strings, not objects)
+      targetStart: this._extractDateField(epic.fields?.customfield_10015) || this._extractDateField(epic.fields?.customfield_10011) || null,
+      targetEnd: this._extractDateField(epic.fields?.customfield_10016) || null,
       storyPoints: epic.fields?.customfield_10061 || 0,
       parentKey: epic.fields?.parent?.key || null,
       children: {
@@ -148,8 +157,8 @@ class EpicMetricsService {
         assignee: init.fields?.assignee?.displayName || 'Unassigned',
         created: init.fields?.created || null,
         dueDate: init.fields?.duedate || null,
-        targetStart: init.fields?.customfield_10015 || init.fields?.customfield_10011 || null,
-        targetEnd: init.fields?.customfield_10016 || null,
+        targetStart: this._extractDateField(init.fields?.customfield_10015) || this._extractDateField(init.fields?.customfield_10011) || null,
+        targetEnd: this._extractDateField(init.fields?.customfield_10016) || null,
         epics: [],
         totalEpics: 0,
         completedEpics: 0,

@@ -4,6 +4,13 @@ import EpicTimelineChart from './EpicTimelineChart';
 import DependencyMatrix from './DependencyMatrix';
 import { IssueTypeIcon, JiraLink } from './JiraIcons';
 
+const formatSafeDate = (dateStr) => {
+  if (!dateStr || typeof dateStr === 'object') return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+};
+
 const HEALTH_COLORS = {
   'on-track': { bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500' },
   'at-risk': { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
@@ -223,16 +230,12 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                       </td>
                       <td className="py-2 px-3">
                         <span className="text-xs text-gray-400">
-                          {epic.targetStart ? new Date(epic.targetStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                            : epic.created ? new Date(epic.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                            : '—'}
+                          {formatSafeDate(epic.targetStart) || formatSafeDate(epic.created) || '—'}
                         </span>
                       </td>
                       <td className="py-2 px-3">
                         <span className="text-xs text-gray-400">
-                          {epic.targetEnd ? new Date(epic.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                            : epic.dueDate ? new Date(epic.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                            : '—'}
+                          {formatSafeDate(epic.targetEnd) || formatSafeDate(epic.dueDate) || '—'}
                         </span>
                       </td>
                       <td className="py-2 px-3">
@@ -349,14 +352,10 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                       </span>
                       <span className="text-xs text-gray-700 flex-1">{epic.summary}</span>
                       <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
-                        {epic.targetStart ? new Date(epic.targetStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                          : epic.created ? new Date(epic.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                          : '—'}
+                        {formatSafeDate(epic.targetStart) || formatSafeDate(epic.created) || '—'}
                       </span>
                       <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
-                        {epic.targetEnd ? new Date(epic.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                          : epic.dueDate ? new Date(epic.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
-                          : '—'}
+                        {formatSafeDate(epic.targetEnd) || formatSafeDate(epic.dueDate) || '—'}
                       </span>
                       <span className={`text-[9px] px-1.5 py-0.5 rounded ${
                         epic.status?.toLowerCase().includes('done') || epic.status?.toLowerCase().includes('closed') ? 'bg-green-100 text-green-700' :
