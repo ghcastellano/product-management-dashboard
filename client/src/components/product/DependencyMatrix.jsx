@@ -75,9 +75,9 @@ export default function DependencyMatrix({ epics, jiraBaseUrl = '' }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 bg-white z-10">
             <tr className="border-b border-gray-200">
               <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Epic</th>
               <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Health</th>

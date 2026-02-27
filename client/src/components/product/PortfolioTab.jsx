@@ -321,7 +321,11 @@ export default function PortfolioTab({ credentials, selectedBoards, portfolioDat
           {/* All initiatives with progress */}
           <div className="space-y-2 max-h-[500px] overflow-y-auto">
             {initiativeSummary.initiatives
-              .sort((a, b) => b.totalEpics - a.totalEpics)
+              .sort((a, b) => {
+                const order = { 'new': 0, 'undefined': 0, 'indeterminate': 1, 'done': 2 };
+                const statusDiff = (order[a.statusCategory] ?? 0) - (order[b.statusCategory] ?? 0);
+                return statusDiff !== 0 ? statusDiff : b.totalEpics - a.totalEpics;
+              })
               .map(init => (
                 <div key={init.key} className="flex items-center gap-3">
                   <span className="inline-flex items-center gap-1 w-24 shrink-0">

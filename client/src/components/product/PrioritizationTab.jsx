@@ -160,6 +160,7 @@ export default function PrioritizationTab({ credentials, selectedBoards, epicDat
   const bubbleOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    layout: { padding: { top: 20, right: 20, bottom: 10, left: 10 } },
     plugins: {
       legend: { position: 'top', labels: { font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' } },
       tooltip: {

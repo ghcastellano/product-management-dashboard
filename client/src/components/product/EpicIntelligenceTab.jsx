@@ -184,12 +184,14 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
 
         {/* Epic Table View */}
         {viewMode === 'epics' && (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
             <table className="w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 bg-white z-10">
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase w-16">Key</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Epic</th>
+                  <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase w-20">Start</th>
+                  <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase w-20">End</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase w-24">Status</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase w-24">Health</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase w-36">Progress</th>
@@ -220,6 +222,20 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                         </div>
                       </td>
                       <td className="py-2 px-3">
+                        <span className="text-xs text-gray-400">
+                          {epic.targetStart ? new Date(epic.targetStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                            : epic.created ? new Date(epic.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                            : '—'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3">
+                        <span className="text-xs text-gray-400">
+                          {epic.targetEnd ? new Date(epic.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                            : epic.dueDate ? new Date(epic.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                            : '—'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3">
                         <span className={`text-xs px-2 py-0.5 rounded ${
                           epic.statusCategory === 'done' ? 'bg-green-100 text-green-700' :
                           epic.statusCategory === 'indeterminate' ? 'bg-blue-100 text-blue-700' :
@@ -246,7 +262,7 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                     {/* Expanded child issues */}
                     {expandedEpic === epic.key && epic.children.issues.length > 0 && (
                       <tr>
-                        <td colSpan={8} className="bg-gray-50 px-6 py-3">
+                        <td colSpan={10} className="bg-gray-50 px-6 py-3">
                           <div className="text-xs text-gray-500 mb-2 font-medium">
                             Child Issues ({epic.children.total}) — {epic.children.done} done, {epic.children.inProgress} in progress, {epic.children.todo} to do
                           </div>
@@ -280,7 +296,7 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
 
         {/* Initiative View */}
         {viewMode === 'initiatives' && (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto">
             {initiatives.map(initiative => (
               <div key={initiative.key} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
@@ -332,6 +348,16 @@ export default function EpicIntelligenceTab({ epicData, loading, credentials }) 
                         <JiraLink issueKey={epic.key} jiraBaseUrl={jiraBaseUrl} className="text-xs font-medium text-purple-700" />
                       </span>
                       <span className="text-xs text-gray-700 flex-1">{epic.summary}</span>
+                      <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
+                        {epic.targetStart ? new Date(epic.targetStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                          : epic.created ? new Date(epic.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                          : '—'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 w-20 text-center shrink-0">
+                        {epic.targetEnd ? new Date(epic.targetEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                          : epic.dueDate ? new Date(epic.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                          : '—'}
+                      </span>
                       <span className={`text-[9px] px-1.5 py-0.5 rounded ${
                         epic.status?.toLowerCase().includes('done') || epic.status?.toLowerCase().includes('closed') ? 'bg-green-100 text-green-700' :
                         epic.status?.toLowerCase().includes('progress') ? 'bg-blue-100 text-blue-700' :

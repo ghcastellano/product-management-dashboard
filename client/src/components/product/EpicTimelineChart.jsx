@@ -25,6 +25,13 @@ function formatDate(ts) {
   return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
 }
 
+function formatShortDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+}
+
 export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl = '' }) {
   const [collapsed, setCollapsed] = useState(null); // null = auto (collapse all on large datasets)
   const [hideDone, setHideDone] = useState(false);
@@ -366,6 +373,12 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
               <div className="w-[300px] min-w-[300px] px-3 flex items-center text-xs font-medium text-gray-500 border-r border-gray-200 bg-gray-50">
                 Initiative / Epic
               </div>
+              <div className="w-[75px] min-w-[75px] px-1 flex items-center justify-center text-[10px] font-medium text-gray-500 border-r border-gray-200 bg-gray-50">
+                Start
+              </div>
+              <div className="w-[75px] min-w-[75px] px-1 flex items-center justify-center text-[10px] font-medium text-gray-500 border-r border-gray-200 bg-gray-50">
+                End
+              </div>
               <div className="flex-1 relative">
                 {monthMarkers.map(m => (
                   <div key={m.ts} className="absolute top-0 h-full flex items-center"
@@ -381,13 +394,13 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
               {/* Grid lines */}
               {monthMarkers.map(m => (
                 <div key={m.ts} className="absolute top-0 h-full border-l border-gray-100"
-                  style={{ left: `calc(300px + (100% - 300px) * ${m.pct / 100})` }} />
+                  style={{ left: `calc(450px + (100% - 450px) * ${m.pct / 100})` }} />
               ))}
 
               {/* Today line */}
               {todayPercent >= 0 && todayPercent <= 100 && (
                 <div className="absolute top-0 h-full border-l-2 border-purple-400 z-10"
-                  style={{ left: `calc(300px + (100% - 300px) * ${todayPercent / 100})` }}>
+                  style={{ left: `calc(450px + (100% - 450px) * ${todayPercent / 100})` }}>
                   <span className="absolute top-0 left-1 text-[9px] text-purple-500 font-medium bg-white px-0.5">Today</span>
                 </div>
               )}
@@ -464,6 +477,20 @@ export default function EpicTimelineChart({ epics, initiatives = [], jiraBaseUrl
                           }`}>{row.status}</span>
                         </span>
                       )}
+                    </div>
+
+                    {/* Date columns */}
+                    <div className="w-[75px] min-w-[75px] flex items-center justify-center border-r border-gray-100 text-[10px] text-gray-400"
+                      style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      {isInit
+                        ? formatShortDate(row._start ? new Date(row._start).toISOString() : null)
+                        : formatShortDate(row.targetStart || row.created)}
+                    </div>
+                    <div className="w-[75px] min-w-[75px] flex items-center justify-center border-r border-gray-100 text-[10px] text-gray-400"
+                      style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      {isInit
+                        ? formatShortDate(row._end ? new Date(row._end).toISOString() : null)
+                        : formatShortDate(row.targetEnd || row.dueDate || row.resolutionDate)}
                     </div>
 
                     {/* Timeline bar area */}
